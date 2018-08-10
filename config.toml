@@ -15,6 +15,7 @@ paginate = 5
   # Shown in the home page
   subtitle = "Software Engineer"
   brand = "Huan<br>Zhang"
+  disqus = "fisher046"
   # CSS name for highlight.js
   highlightjs = "androidstudio"
   dateFormat = "02 Jan 2006"
@@ -30,6 +31,6 @@ paginate = 5
   [[menu.main]]
     name = "Topics"
     pre = "<i class='fa fa-folder fa-fw'></i>"
-    weight = 1
+    weight = 3
     identifier = "topic"
     url = "/topics/"
