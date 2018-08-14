@@ -1,8 +1,8 @@
 +++
-draft = true
+draft = false
 tags = ["Programming"]
 topics = ["Golang"]
-description = "Understanding the nil in Golang"
+description = "A summary of the nil in Golang based on some articles."
 title = "Understanding the nil in Golang"
 date = "2018-08-10T17:00:00+08:00"
 +++
@@ -51,7 +51,7 @@ if err != nil {
 }
 {{< /highlight >}}
 
-Zero value.
+Here is a summary about zero value of all types.
 
 {{< highlight go >}}
 bool -> false                              
@@ -71,14 +71,14 @@ See an example.
 {{< highlight go >}}
 type Person struct {
     AgeYears int
-    Name string
-    Friends []Person
+    Name     string
+    Friends  []Person
 }
 
 var p Person // Person{0, "", nil}
 {{< /highlight >}}
 
-Only declaration, no assignment.
+If a variable is only declared and has no assignment, it is zero value.
 
 `nil` is a pre-defined variable, not a keyword.
 
@@ -97,7 +97,7 @@ But you should not do it.
 
 ## What's the usage of nil?
 
-### Pointers
+### For Pointers
 
 {{< highlight go >}}
 var p *int
@@ -177,7 +177,7 @@ func(t *tree) String() string {
     return fmt.Sprint(t.l, t.v, t.r)
 }
 
-// nil receivers are useful: Find
+// nil receiver are useful: Find
 func (t *tree) Find(v int) bool {
     if t == nil {
         return false
@@ -188,7 +188,7 @@ func (t *tree) Find(v int) bool {
 
 So if no special reason, avoid to use initialize function like `NewX()`. Just use the default value.
 
-## Slices
+## For Slices
 
 {{< highlight go >}}
 // nil slices
@@ -199,23 +199,23 @@ for range s  // iterates zero times
 s[i]  // panic: index out of range
 {{< /highlight >}}
 
-A `nil` slice only cannot be indexed and all other operations can be done. Use `append` and it will be extended automatically. See slice data structure:
+A `nil` slice can only not be indexed and all other operations can be done. Use `append` and it will be extended automatically. See slice data structure:
 
 {{< fluid_imgs
-  "pure-u-1-1|/img/post/slice_structure.png|Dog"
+  "slice-structure|/img/post/slice_structure.png|"
 >}}
-
-![Slice Data Structure](slice_structure.png)
 
 When there is an element in it, it will be like:
 
-![Slice with Element](slice_with_element.png)
+{{< fluid_imgs
+  "slice-with-element|/img/post/slice_with_element.png|"
+>}}
 
 So no need to care about size of slice.
 
-## Maps
+## For Maps
 
-Map, function and channel are special pointers in Golang and have there own implementation.
+Map, function and channel are special pointers in Golang and have their own implementation.
 
 {{< highlight go >}}
 // nil maps
@@ -264,7 +264,7 @@ Or we use `nil`.
 NewGet("http://google.com", nil)
 {{< /highlight >}}
 
-## Channel
+## For Channels
 
 {{< highlight go >}}
 // nil channels
@@ -317,3 +317,7 @@ func merge(out chan<- int, a, b <-chan int) {
   close(out)
 }
 {{< /highlight >}}
+
+When `a` or `b` is closed, set it as `nil`, it means the `case` will not be used because `nil` channel will be blocked forever.
+
+## For Interfaces (TBD)
