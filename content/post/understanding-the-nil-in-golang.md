@@ -295,29 +295,70 @@ If `a` or `b` is closed, `<-a` or `<-b` will return zero value without a stop. T
 
 {{< highlight go >}}
 func merge(out chan<- int, a, b <-chan int) {
-  for a != nil || b != nil {
-    select {
-      case v, ok := <-a:
-          if !ok {
-            a = nil
-            fmt.Println("a is nil")
-            continue
-          }
-          out <- v
-      case v, ok := <-b:
-          if !ok {
-            b = nil
-            fmt.Println("b is nil")
-            continue
-          }
-          out <- v
+    for a != nil || b != nil {
+        select {
+            case v, ok := <-a:
+                if !ok {
+                    a = nil
+                    fmt.Println("a is nil")
+                    continue
+                }
+                out <- v
+            case v, ok := <-b:
+                if !ok {
+                    b = nil
+                    fmt.Println("b is nil")
+                    continue
+                }
+            out <- v
+        }
     }
-  }
-  fmt.Println("close out")
-  close(out)
+    fmt.Println("close out")
+    close(out)
 }
 {{< /highlight >}}
 
 When `a` or `b` is closed, set it as `nil`, it means the `case` will not be used because `nil` channel will be blocked forever.
 
-## For Interfaces (TBD)
+## For Interfaces
+
+Interface is not a pointer, it contains two parts, type and value. Only when both of them are `nil`, it is `nil`. See:
+
+{{< highlight go >}}
+func do() error {  // error(*doError, nil)
+    var err *doError
+    return err  // nil of type *doError
+}
+
+func main() {
+    err := do()
+    fmt.Println(err == nil)
+}
+{{< /highlight >}}
+
+The output is `false`. Because the type of error is `*doError` and the value is `nil`, the error is not `nil`. So do not declare an error, just return `nil`.
+
+{{< highlight go >}}
+func do() error {
+    return nil
+}
+{{< /highlight >}}
+
+See another code:
+
+{{< highlight go >}}
+func do() *doError {  // nil of type *doError
+    return nil
+}
+
+func wrapDo() error {  // error (*doError, nil)
+    return do()        // nil of type *doError
+}
+
+func main() {
+    err := wrapDo()          // error  (*doError, nil)
+    fmt.Println(err == nil)  // false
+}
+{{< /highlight >}}
+
+The output is still `false` because although `wrapDo` returns error type, `do` returns `*doError`. So do not return typed error. Follow these 2 principles, then we can carefully use `if x != nil`.
