@@ -1,7 +1,7 @@
 +++
 draft = false
-tags = ["OpenSource"]
-topics = ["Nginx/Kong"]
+tags = ["Nginx"]
+topics = ["OpenSource"]
 description = "An example of how to use Kong"
 title = "An example of Kong"
 date = "2018-10-15T21:49:00+08:00"
