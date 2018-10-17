@@ -1,6 +1,6 @@
 +++
 draft = false
-tags = ["Nginx"]
+tags = ["Nginx","Kong"]
 topics = ["OpenSource"]
 description = "An example of how to use Kong"
 title = "An example of Kong"
@@ -32,7 +32,7 @@ An API gateway based on Nginx like below picture. It allows programming in (1,2,
 
 ## The Requirement
 
-I need an API `/country`, it can return the data center location which the service is running in.
+I need an API `/country`, it can return the deployment location which the service is running in.
 
 For example,
 
@@ -124,3 +124,4 @@ it comes from UK
 
 - So many community provided plugins.
 - Can write your own plugins.
+- Dynamically add/remove service proxy without restarting.
