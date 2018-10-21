@@ -1,5 +1,5 @@
 +++
-draft = false
+draft = true
 tags = ["Nginx","Kong"]
 topics = ["OpenSource"]
 description = "An example of how to use Kong"
@@ -36,7 +36,7 @@ I need an API `/country`, it can return the deployment location which the servic
 
 For example,
 
-{{< highlight shell >}}
+{{< highlight Bash >}}
 $ curl http://localhost:30080/country
 cannot know where it comes from
 
