@@ -97,4 +97,118 @@ https://github.com/helm/charts/blob/master/incubator/kafka/templates/service-hea
 
 # About Ingress
 
+## Basic function
+
+{{< fluid_imgs
+  "ingress|/img/post/ingress.png|"
+>}}
+
+- Externally-reachable URLs
+- Load balance traffic
+- Terminate SSL
+- Name based virtual hosting
+
+See a simple snippet.
+
+{{< highlight YAML >}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /testpath
+        backend:
+          serviceName: test
+          servicePort: 80
+{{< /highlight >}}
+
+## Ingress controller
+
+- GCE and Nginx supported by Kubernetes.
+- F5.
+- Kong.
+- Traefik.
+- Nginx supported by Nginx,Inc.
+- HAProxy.
+- Istio.
+
+## Why need more controllers?
+
+Suppose you have some requirements like:
+
+- Select route rule based on header.
+- Select route rule based on header with regex.
+- Set weight to different Services.
+- Combine weight and header to select route rule.
+- Route request with customized rule.
+
+## Why Istio is much powerful?
+
+Istio Gateway is a new resource defined by Custom Resource Definition(CRD), while others are limited by Ingress synax.
+
+An Gated Launch sample:
+
+Define a Gateway resource.
+
+{{< highlight YAML >}}
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: book-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+{{< /highlight >}}
+
+Define a Virtual Service.
+
+{{< highlight YAML >}}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: book-public
+spec:
+  gateways:
+  - book-gateway
+  hosts:
+  - '*'
+  http:
+  - match:
+    - headers:
+        user:
+          exact: new
+    route:
+    - destination:
+        host: new-book-svc
+        port:
+          number: 80
+      weight: 50
+    - destination:
+        host: old-book-svc
+        port:
+          number: 80
+      weight: 50
+  - route:
+    - destination:
+        host: old-book-svc
+        port:
+          number: 80
+{{< /highlight >}}
+
 # About RBAC
+
+# About Secret
+
+# Never Miss These
