@@ -207,8 +207,6 @@ spec:
           number: 80
 {{< /highlight >}}
 
-# About RBAC
+# Resource
 
-# About Secret
-
-# Never Miss These
+If you don't know how to get started, see examples in https://github.com/helm/charts.
