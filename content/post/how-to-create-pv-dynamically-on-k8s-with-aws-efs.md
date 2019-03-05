@@ -18,12 +18,12 @@ date = "2019-03-05T09:36:00+08:00"
 
 3. SSH to the instance, mount the EFS and create folder.
 
-```bash
+{{< highlight Bash >}}
 sudo yum install -y nfs-utils
 sudo mkdir efs
 sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${file_sys_id}.efs.us-east-1.amazonaws.com:/ efs
 sudo mkdir efs/pvs
-```
+{{< /highlight >}}
 
 `file_sys_id` can be found from AWS EFS console.
 
@@ -31,20 +31,20 @@ sudo mkdir efs/pvs
 
 1. Create `ServiceAccount`.
 
-```yaml
+{{< highlight YAML >}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: efs-provisioner
-```
+{{< /highlight >}}
 
-```bash
+{{< highlight Bash >}}
 kubectl create -f service_account.yaml
-```
+{{< /highlight >}}
 
 2. Create `RBAC` rules.
 
-```yaml
+{{< highlight YAML >}}
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -99,26 +99,26 @@ roleRef:
   kind: Role
   name: leader-locking-efs-provisioner
   apiGroup: rbac.authorization.k8s.io
-```
+{{< /highlight >}}
 
-```bash
+{{< highlight Bash >}}
 kubectl create -f rbac.yaml
-```
+{{< /highlight >}}
 
 # Deploy EFS provisioner to k8s cluster
 
 1. Create `ConfigMap`.
 
-```bash
+{{< highlight Bash >}}
 kubectl create configmap efs-provisioner \
 --from-literal=file.system.id=${file_sys_id} \
 --from-literal=aws.region=us-east-1 \
 --from-literal=provisioner.name=aws-efs
-```
+{{< /highlight >}}
 
 2. Create `Deployment`.
 
-```yaml
+{{< highlight YAML >}}
 kind: Deployment
 apiVersion: extensions/v1beta1
 metadata:
@@ -160,31 +160,31 @@ spec:
           nfs:
             server: <file system id>.efs.us-east-1.amazonaws.com
             path: /pvs
-```
+{{< /highlight >}}
 
-```bash
+{{< highlight Bash >}}
 kubectl apply -f deployment.yaml
-```
+{{< /highlight >}}
 
 # Create `StorageClass` on k8s cluster
 
-```yaml
+{{< highlight YAML >}}
 kind: StorageClass
 apiVersion: storage.k8s.io/v1beta1
 metadata:
   name: aws-efs
 provisioner: aws-efs
-```
+{{< /highlight >}}
 
-```bash
+{{< highlight Bash >}}
 kubectl create -f sc.yaml
-```
+{{< /highlight >}}
 
 # Create PVC
 
 Note: For every `PersistentVolumeClaim` you make, it will make a subdirectory in EFS under `/pvs/pvc-<claim_id>`.
 
-```yaml
+{{< highlight YAML >}}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
@@ -197,15 +197,15 @@ spec:
   resources:
     requests:
       storage: 500Gi
-```
+{{< /highlight >}}
 
-```bash
+{{< highlight Bash >}}
 kubectl create -f pvc.yaml
-```
+{{< /highlight >}}
 
 # Use PVC
 
-```yaml
+{{< highlight YAML >}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -227,4 +227,4 @@ spec:
         - name: efs
           persistentVolumeClaim:
             claimName: efs
-```
+{{< /highlight >}}
