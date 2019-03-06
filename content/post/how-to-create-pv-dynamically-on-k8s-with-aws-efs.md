@@ -1,6 +1,6 @@
 +++
 draft = false
-topics = ["Kubernetes"]
+categories = ["Kubernetes"]
 description = "A method to create PV dynamically on k8s with AWS EFS."
 title = "How to create PV dynamically on k8s with AWS EFS"
 date = "2019-03-05T09:36:00+08:00"

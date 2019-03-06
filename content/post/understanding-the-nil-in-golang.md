@@ -1,7 +1,6 @@
 +++
 draft = false
-tags = ["Programming"]
-topics = ["Golang"]
+categories = ["Golang"]
 description = "A summary of the nil in Golang based on some articles."
 title = "Understanding the nil in Golang"
 date = "2018-08-10T17:00:00+08:00"
@@ -54,9 +53,9 @@ if err != nil {
 Here is a summary about zero value of all types.
 
 {{< highlight go >}}
-bool -> false                              
-numbers -> 0                                 
-string -> ""      
+bool -> false
+numbers -> 0
+string -> ""
 
 pointers -> nil
 slices -> nil
