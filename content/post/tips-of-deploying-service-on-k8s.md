@@ -1,10 +1,11 @@
-+++
-draft = false
-categories = ["Kubernetes"]
-description = "Some tips from experience"
-title = "Tips of deploying service on Kubernetes"
-date = "2018-10-21T13:35:00+08:00"
-+++
+---
+title: "Tips of deploying service on Kubernetes"
+date: 2018-10-21T13:35:00+08:00
+lastmod: 2018-10-21T13:35:00+08:00
+draft: false
+tags: ["Kubernetes"]
+categories: ["Kubernetes"]
+---
 
 # Preface
 

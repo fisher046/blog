@@ -6,6 +6,15 @@ title = "Understanding the nil in Golang"
 date = "2018-08-10T17:00:00+08:00"
 +++
 
+---
+title: "Understanding the nil in Golang"
+date: 2018-08-10T17:00:00+08:00
+lastmod: 2018-08-10T17:00:00+08:00
+draft: false
+tags: ["Golang", "nil"]
+categories: ["Golang"]
+---
+
 # Understanding the nil in Golang
 
 ## Reference

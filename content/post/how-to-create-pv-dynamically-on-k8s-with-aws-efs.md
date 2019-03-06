@@ -1,50 +1,59 @@
-+++
-draft = false
-categories = ["Kubernetes"]
-description = "A method to create PV dynamically on k8s with AWS EFS."
-title = "How to create PV dynamically on k8s with AWS EFS"
-date = "2019-03-05T09:36:00+08:00"
-+++
+---
+title: "How to create PV dynamically on k8s with AWS EFS"
+date: 2019-03-05T09:36:00+08:00
+lastmod: 2019-03-06T09:31:00+08:00
+draft: false
+tags: ["Kubernetes", "EFS", "Persistent Volume"]
+categories: ["Kubernetes"]
+---
 
-# Prerequisites
+# Preface
 
-1. Create EFS on AWS
+When I was using AWS as Kubernetes cloud provider, I have two choices for persistent volume, EBS and EFS. However, EBS can only mount to one EC2 instance, which is not appropriate to my scenario, so I can only choose EFS.
 
-   Selected Subnets should contain the k8s cluster subnets.
+My requirement is that when I need a persistent volume, I only create PVC and the related PV should be created automatically. So I summary the steps to reach my purpose in below words.
 
-   Selected Security Groups should ensure the EFS can be accessible.
+# Steps on AWS
 
-2. Create one EC2 instance in the same VPC as EFS.
+## Create EFS on AWS
 
-3. SSH to the instance, mount the EFS and create folder.
+This step can be referenced to https://docs.aws.amazon.com/efs/latest/ug/getting-started.html.
 
-{{< highlight Bash >}}
+I only test the case that Kubernetes cluster and EFS are in the same VPC.
+
+## Create folder in EFS for PV
+
+Create one EC2 instance and SSH to it, mount the EFS and create folder.
+
+```shell
 sudo yum install -y nfs-utils
 sudo mkdir efs
 sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${file_sys_id}.efs.us-east-1.amazonaws.com:/ efs
 sudo mkdir efs/pvs
-{{< /highlight >}}
+```
 
-`file_sys_id` can be found from AWS EFS console.
+`file_sys_id` can be found from AWS EFS page.
 
-# Prepare authorization
+# Steps on Kubernetes cluster
 
-1. Create `ServiceAccount`.
+## Prepare authorization
 
-{{< highlight YAML >}}
+Create one service account for EFS provisioner, which will help you create PV with EFS.
+
+```yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: efs-provisioner
-{{< /highlight >}}
+```
 
-{{< highlight Bash >}}
+```shell
 kubectl create -f service_account.yaml
-{{< /highlight >}}
+```
 
-2. Create `RBAC` rules.
+Authorize the service account, reference to https://github.com/kubernetes-incubator/external-storage/blob/master/aws/efs/deploy/rbac.yaml.
 
-{{< highlight YAML >}}
+```yaml
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -99,26 +108,30 @@ roleRef:
   kind: Role
   name: leader-locking-efs-provisioner
   apiGroup: rbac.authorization.k8s.io
-{{< /highlight >}}
+```
 
-{{< highlight Bash >}}
+This example is using `default` namespace, change it if you need to deploy in different namespace.
+
+```shell
 kubectl create -f rbac.yaml
-{{< /highlight >}}
+```
 
-# Deploy EFS provisioner to k8s cluster
+## Deploy EFS provisioner
 
-1. Create `ConfigMap`.
+Create ConfigMap.
 
-{{< highlight Bash >}}
+`file_sys_id` can be found from AWS EFS.
+
+```shell
 kubectl create configmap efs-provisioner \
 --from-literal=file.system.id=${file_sys_id} \
 --from-literal=aws.region=us-east-1 \
 --from-literal=provisioner.name=aws-efs
-{{< /highlight >}}
+```
 
-2. Create `Deployment`.
+Create Deployment.
 
-{{< highlight YAML >}}
+```yaml
 kind: Deployment
 apiVersion: extensions/v1beta1
 metadata:
@@ -160,31 +173,31 @@ spec:
           nfs:
             server: <file system id>.efs.us-east-1.amazonaws.com
             path: /pvs
-{{< /highlight >}}
+```
 
-{{< highlight Bash >}}
+```shell
 kubectl apply -f deployment.yaml
-{{< /highlight >}}
+```
 
-# Create `StorageClass` on k8s cluster
+Create StorageClass.
 
-{{< highlight YAML >}}
+```yaml
 kind: StorageClass
 apiVersion: storage.k8s.io/v1beta1
 metadata:
   name: aws-efs
 provisioner: aws-efs
-{{< /highlight >}}
+```
 
-{{< highlight Bash >}}
+```shell
 kubectl create -f sc.yaml
-{{< /highlight >}}
+```
 
-# Create PVC
+## Use the created storage class to create PVC
 
-Note: For every `PersistentVolumeClaim` you make, it will make a subdirectory in EFS under `/pvs/pvc-<claim_id>`.
+For every PVC you make, it will make a subdirectory in EFS under `/pvs/pvc-<claim_id>`.
 
-{{< highlight YAML >}}
+```yaml
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
@@ -197,34 +210,10 @@ spec:
   resources:
     requests:
       storage: 500Gi
-{{< /highlight >}}
+```
 
-{{< highlight Bash >}}
+```shell
 kubectl create -f pvc.yaml
-{{< /highlight >}}
+```
 
-# Use PVC
-
-{{< highlight YAML >}}
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: efs-test
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: efs-test
-    spec:
-      containers:
-      - name: efs-test
-        image: alpine:latest
-        volumeMounts:
-        - mountPath: /efs_vol
-          name: efs
-      volumes:
-        - name: efs
-          persistentVolumeClaim:
-            claimName: efs
-{{< /highlight >}}
+The PVC can be in same or different namespace from EFS provisioner.
